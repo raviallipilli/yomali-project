@@ -1,0 +1,19 @@
+{
+    "name": "raviallipilli/yomali-project",
+    "description": "Simple Website Traffic Tracker Project",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Ravi Allipilli"
+        }
+    ],
+    "require": {
+        "slim/slim": "2.*",
+        "hashids/hashids": "^1.0",
+        "monolog/monolog": "*",
+        "phpmailer/phpmailer": "*",
+        "flynsarmy/slim-monolog": "*", 
+        "guzzlehttp/guzzle": "*", 
+        "laminas/laminas-zendframework-bridge": "^1.0",
+        "laminas/laminas-escaper": "^2.6"    }
+}

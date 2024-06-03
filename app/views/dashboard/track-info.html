@@ -1,0 +1,90 @@
+<h1>Tracking Information</h1>
+<div class="box">
+    <h2>Select Time Period</h2>
+    <?php if ($data_count > 0): ?>
+        <b>We found <?php echo $data_count; ?> records between the selected period <?php echo format_date($startDate, "d/m/Y") . " " . format_date($startTime, 'H:i A') . " - " . format_date($endDate, "d/m/Y") . " " . format_date($endTime, 'H:i A'); ?></b>
+    <?php else: ?>
+        <b>No records found. Please select a different time period</b>
+    <?php endif; ?>
+    <form action="<?php echo PAGE_URL; ?>" method="post" enctype="multipart/form-data">
+        <b>Start Date:</b>
+        <input type="date" id="startDate" name="startDate" value="<?php echo $startDate ?? date('Y-m-d'); ?>">
+        <b>End Date:</b>
+        <input type="date" id="endDate" name="endDate" value="<?php echo $endDate ?? date('Y-m-d'); ?>">
+        <br><br>
+        <b>Start Time:</b>
+        <select id="startTime" name="startTime" required>
+            <?php 
+            $start = new DateTime('00:00');
+            $interval = new DateInterval('PT1H');
+            for ($i = 0; $i < 24; $i++) {
+                $hour = $start->format('H:i');
+                $selected = $hour == $startTime ? 'selected="selected"' : '';
+                echo "<option value=\"$hour\" $selected>$hour</option>";
+                $start->add($interval);
+            }
+            ?>
+        </select>
+        <b>End Time:</b>
+        <select id="endTime" name="endTime" required>
+            <?php 
+            $end = new DateTime('00:00');
+            $interval = new DateInterval('PT1H');
+            for ($i = 0; $i < 24; $i++) {
+                $hour = $end->format('H:i');
+                $selected = $hour == $endTime ? 'selected="selected"' : '';
+                echo "<option value=\"$hour\" $selected>$hour</option>";
+                $end->add($interval);
+            }
+            ?>
+        </select>
+        <?php if ($_SESSION['is_admin']): ?>
+        <b>Filter By User:</b>
+        <select name="user_id" required>
+            <option value="0">All Users</option>
+            <?php foreach ($users as $user): 
+                $user_id = $user['user_id'];
+                $email = $user['email'];
+                $selected = $user_id == $userId ? 'selected="selected"' : '';    
+                echo "<option value=\"$user_id\" $selected>$email</option>";
+            endforeach; ?>
+        </select>
+        <?php endif; ?>
+        <div class="submit_but">
+            <button type="submit" id="submit" class="btn btn-primary btn-sm">Track</button>
+        </div>
+    </form>
+</div>
+<div style="height: 400px; overflow-y:auto; overflow-x:auto;">
+	<table id="tablesorter" class="table">
+		<thead>
+			<tr>
+				<th>User</th>
+				<th>Page Name</th>
+				<th>Total Visits</th>
+				<th>Unique Visits</th>
+				<th>URL</th>
+				<th>Duration (secs)</th>
+				<th>User Agent</th>
+				<th>Entry Timestamp</th>
+				<th class="filter-false">&nbsp;</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php if ($data_count > 0): ?>
+			<?php foreach ($data as $item): ?>
+				<tr>            
+					<td data-th="User:"><?php echo $item['email']; ?></td>        
+					<td data-th="Page Name:"><?php echo $item['page_name']; ?></td>    
+					<td data-th="Total Visits:"><?php echo $item['total_visits']; ?></td>          
+					<td data-th="Unique Visits:"><?php echo $item['unique_visits']; ?></td>            
+					<td data-th="URL:"><?php echo $item['url']; ?></td>
+					<td data-th="Duration (secs):"><?php echo $item['avg_duration_seconds']; ?></td>
+					<td data-th="User Agent:"><?php echo $item['user_agent']; ?></td>
+					<td data-th="Entry Timestamp:"><?php echo format_date($item['entry_timestamp'], 'd/m/Y H:i:s A'); ?></td>
+				</tr>
+			<?php endforeach; ?>
+		<?php endif; ?>
+		</tbody>
+	</table>
+</div>

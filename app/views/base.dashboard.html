@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />;
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<title>Yomali</title>
+		<!--CSS FILES-->
+		<link rel="stylesheet" type="text/css" href="<?php echo RESOURCES_CSS; ?>/dashboard/dashboard.css">
+		<link rel="stylesheet" type="text/css" href="<?php echo RESOURCES_CSS; ?>/dashboard/styles.min.css?v=<?php echo date('YmdHis')?>">
+		<link rel="stylesheet" type="text/css" href="<?php echo RESOURCES_CSS; ?>/dashboard/main.css?v=<?php echo date('YmdHis')?>">
+		<!--JS FILES-->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="<?php echo RESOURCES_JS; ?>/dashboard/dashboard.js?v=<?php echo date('YmdHis')?>"></script>
+		
+		<!--Javascript Tracker-->
+		<script>
+			$(document).ready(function() {
+				// Capture the current timestamp when the page is loaded
+				const entryTimestamp = new Date().toISOString();
+				
+				// Get the current URL of the page
+				const url = window.location.href;
+				
+				// Get the page name from the PHP variable
+				const page_name = '<?php echo $page_name; ?>';
+
+				// Attach an event listener to the window's beforeunload event
+				// This event triggers when the user is about to leave the page
+				$(window).on('beforeunload', function() {
+					// Capture the current timestamp when the user is about to leave the page
+					const exitTimestamp = new Date().toISOString();
+					
+					// Prepare the data to be sent to the server
+					const requestData = {
+						login_id: '<?php echo $_SESSION["login_id"]; ?>',  // User ID from the PHP session
+						is_user_loggedIn: '<?php echo $_SESSION["is_logged_in"] ? "yes" : "no"; ?>',  // User login status from the PHP session
+						url: url,  // Current URL
+						page_name: page_name,  // Page name
+						entry_timestamp: entryTimestamp,  // Entry timestamp
+						exit_timestamp: exitTimestamp  // Exit timestamp
+					};
+					
+					// Log the request data to the console for debugging
+					console.log("Request Data: ", requestData);
+
+					// Send an AJAX request to the server to log the visit data
+					$.ajax({
+						url: "/dashboard/track",  // Server endpoint to handle the tracking
+						type: "POST",  // HTTP method
+						contentType: "application/json",  // Data type being sent
+						data: JSON.stringify(requestData),  // Convert requestData object to a JSON string
+						success: function(response) {
+							// Log the success response from the server
+							console.log("Success Response: ", response);
+							console.log("Visit tracked successfully");
+						},
+						error: function(xhr, status, error) {
+							// Log any error that occurs during the request
+							console.error("Error tracking visit: ", xhr.responseText);
+						}
+					});
+				});
+			});
+		</script>
+	<body style="background-color:lightyellow">
+		<header class="cf">
+			<?php 
+			if($_SESSION['is_logged_in'])
+			{
+			?>	
+			<h3><?php  echo date('jS F, l'); ?></h3>
+			<?php } 
+			?>
+			<ul>
+				<?php 
+				if($_SESSION['is_logged_in'])
+				{
+				?>				
+					<li>
+						<i class="fa fa-address-card" aria-hidden="true"></i><a href="/dashboard/profile"><?php echo $_SESSION['login_firstname']?>'s Profile</a>
+					</li>
+					<li>
+						<i class="fa fa-clock-o" aria-hidden="true"></i><a href="/dashboard/login/logout">Logout</a>
+					</li>
+				<?php 
+				} else {
+				?>
+					<li>
+						<i class="fa fa-user" aria-hidden="true"></i><a href="/dashboard/login/login">Login</a>
+					</li>
+				<?php } 
+				?>
+			</ul>
+		</header>
+		<div class="table-wrap">
+			<div class="table-row-wrap">
+				<?php 
+				if($_SESSION['is_logged_in'])
+				{
+				?>
+					<nav>
+						<ul>
+							<li class="loggedin-profile">
+								<i class="fa fa-user"></i>Welcome <?php echo $_SESSION['login_firstname']?>
+							</li>
+							<li>
+								<a <?php echo ($page_name == "users") ? "class='active'" : null?> href="/dashboard/users"><i class="fa fa-user-plus" aria-hidden="true"></i> USERS</a>
+							</li>
+							<li>
+								<a <?php echo ($page_name == "user-files") ? "class='active'" : null?> href="/dashboard/user-files"><i class="fa fa-file-pdf-o" aria-hidden="true"></i>	USER DOCUMENTS</a>
+							</li>
+							<li>
+								<a <?php echo ($page_name == "track-info") ? "class='active'" : null?> href="/dashboard/track-info"><i class="fa fa-plane" aria-hidden="true"></i>	Traffic Tracking </a>
+							</li>
+						</ul>
+					</nav>
+				<?php } 
+				?>
+				<main>
+					<?php require_once($view)?>
+				</main>
+			</div>
+		</div>
+	</body>
+</html>
